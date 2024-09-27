@@ -2,7 +2,7 @@ from ia01.utils import unique, compte, lecture_csv
 from ia01.majoritaire import vote_majoritaire
 from ia01.metriques import taux_erreur, eqm, reqm
 
-data = lecture_csv("C:\\Users\\sogli\\Documents\\IA\\root_td_ia01\\data\\dorade.csv")
+data = lecture_csv("data/dorade.csv")
 espece = []
 poids = []
 
