@@ -125,15 +125,7 @@ def norm_param(X, methode="echelle"):
     
     return loc, scale
 
-def moyenne(X):
-    n = len(X)
-    somme = 0
-    for x in X:
-        somme += x
-    return somme / n
-
-
-def ecart_type(X):
+def variance(X):
     n = len(X)
     moy = moyenne(X)
     sigma = 0
@@ -141,7 +133,27 @@ def ecart_type(X):
     for x in X:
         sigma += (x - moy) ** 2
 
-    return (sigma / n) ** (1 / 2)
+    return sigma / n
 
-def variance(X):
-    return ecart_type(X) ** 2
+def ecart_type(X):
+    return variance(X) ** (1 / 2)
+
+def gini(y):
+    """Calcul de l'impureté de Gini
+
+    Paramètres
+    ----------
+    y : list
+        Liste de labels
+
+    Sorties
+    -------
+    g : float
+        Impureté de Gini
+    """
+    C = compte(y)
+    n = sum(C.values())
+    p2 = [(c / n) ** 2 for c in C.values()]
+    return 1 - sum(p2)
+
+

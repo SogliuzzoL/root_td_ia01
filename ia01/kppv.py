@@ -28,16 +28,15 @@ def kppv(X, X_train, y_train, k, p=2, reg=False):
 
     assert isinstance(k, int) and k > 0, "k doit être un entier strictement positif"
 
-    if not reg:
-        y_pred = []
+    y_pred = []
 
-        for x in X:
-            d = distance(x, X_train)
-            ordre = argsort(d)
-            ppv = [y_train[ordre[i]] for i in range(k)]
-            y_pred.append(vote_majoritaire(ppv))
+    for x in X:
+        d = distance(x, X_train, p)
+        ordre = argsort(d)
+        ppv = [y_train[ordre[i]] for i in range(k)]
+        y_pred.append(vote_majoritaire(ppv, reg))
+    return y_pred
         
-        return y_pred
 
 
 def distance2(x1, x2, p=2):
@@ -56,7 +55,6 @@ def distance2(x1, x2, p=2):
     dist : float
         Distance entre x1 et x2
     """
-
     assert len(x1) == len(x2), "Les vecteurs x1 et x2 doivent être de même dimension."
     assert p > 0, "Le paramètre p doit être strictement supérieur à 0."
     
