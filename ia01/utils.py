@@ -151,9 +151,6 @@ def gini(y):
     g : float
         Impureté de Gini
     """
-    C = compte(y)
-    n = sum(C.values())
-    p2 = [(c / n) ** 2 for c in C.values()]
-    return 1 - sum(p2)
-
-
+    c = compte(y)
+    n = sum(c.values())
+    return 1 - sum([(ci/n) ** 2 for ci in c.values()])

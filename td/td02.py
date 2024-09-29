@@ -1,6 +1,7 @@
 from ia01.kppv import kppv
 from ia01.utils import lecture_csv, norm_param, normalisation
 from ia01.metriques import taux_erreur, reqm
+from ia01.arbre import arbre_pred, arbre_train
 
 # Exercice 1
 dorades = lecture_csv("data/dorade.csv")
@@ -32,3 +33,8 @@ for k in range(3, 10, 2):
 
 # Exercice 2
 
+arbre = arbre_train(X, Y)
+
+for p in [2, 5, 10, 20, 30]:
+    y_pred = arbre_pred(X, arbre, p)
+    print("Profondeur max =", p, ":", taux_erreur(Y, y_pred))
