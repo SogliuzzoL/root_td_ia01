@@ -44,3 +44,5 @@ for j in [1, 3, 5, 7]:
         y_pred = kppv(X_val_k, X_train_k, y_train_k, j)
         somme += taux_erreur(y_val_k, y_pred)
     print(f"Erreur moyenne pour k = {j}: {somme / K}")
+
+
