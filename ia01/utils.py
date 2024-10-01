@@ -139,18 +139,6 @@ def ecart_type(X):
     return variance(X) ** (1 / 2)
 
 def gini(y):
-    """Calcul de l'impureté de Gini
-
-    Paramètres
-    ----------
-    y : list
-        Liste de labels
-
-    Sorties
-    -------
-    g : float
-        Impureté de Gini
-    """
     c = compte(y)
-    n = sum(c.values())
-    return 1 - sum([(ci/n) ** 2 for ci in c.values()])
+    n = sum(c)
+    return 1 - sum([(ci/n) ** 2 for ci in c])

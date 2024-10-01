@@ -1,40 +1,40 @@
-from ia01.kppv import kppv
 from ia01.utils import lecture_csv, norm_param, normalisation
-from ia01.metriques import taux_erreur, reqm
-from ia01.arbre import arbre_pred, arbre_train
+from ia01.metriques import taux_erreur
+from ia01.kppv import kppv
 
-# Exercice 1
-dorades = lecture_csv("data/dorade.csv")
-X = [(float(dorade["longueur"]), float(dorade["poids"])) for dorade in dorades]
+data = lecture_csv("data/dorade.csv")
+n = len(data)
 
-X_parm = norm_param(X, "centre")
-X_norm = normalisation(X, X_parm[0], X_parm[1])
+X_train, y_train = [], []
+for i in range(n):
+    X_train.append([float(data[i]["longueur"]), float(data[i]["poids"])])
+    y_train.append(data[i]["espece"])
 
-X_parm2 = norm_param(X)
-X_norm2 = normalisation(X, X_parm2[0], X_parm2[1])
+for k in [3, 5, 7]:
+    y_pred = kppv(X_train, X_train, y_train, k)
+    print("Taux d'erreur pour k =", k, ":", taux_erreur(y_train, y_pred))
 
-Y = [dorade["espece"] for dorade in dorades]
+for k in [1, 200]:
+    y_pred = kppv(X_train, X_train, y_train, k)
+    print("Taux d'erreurs pour k =", k, ":", taux_erreur(y_train, y_pred))
 
-for k in range(3, 10, 2):
-    y_pred = kppv(X, X, Y, k)
-    err = taux_erreur(Y, y_pred)
-    y_pred1 = kppv(X_norm, X_norm, Y, k)
-    err1 = taux_erreur(Y, y_pred1)
-    y_pred2 = kppv(X_norm2, X_norm2, Y, k)
-    err2 = taux_erreur(Y, y_pred2)
-    print(f"Taux d'erreur pour k={k} : sans normalisation {err}, normalisation centrée {err1}, normalisation echelonée {err2}")
+loc1, scale1 = norm_param(X_train, "echelle")
+loc2, scale2 = norm_param(X_train, "centre")
 
-X_train = [[float(dorade["longueur"]), int(dorade["espece"] == "grise"), int(dorade["espece"] == "marbree")] for dorade in dorades]
-Y_train = [float(dorade["poids"]) for dorade in dorades]
+X_norm1 = normalisation(X_train, loc1, scale1)
+X_norm2 = normalisation(X_train, loc2, scale2)
 
-for k in range(3, 10, 2):
-    Y_pred = kppv(X_train, X_train, Y_train, k, reg=True)
-    print(f"REQM pour k={k}: {reqm(Y_train, Y_pred)}")
-
-# Exercice 2
-
-arbre = arbre_train(X, Y)
-
-for p in [2, 5, 10, 20, 30]:
-    y_pred = arbre_pred(X, arbre, p)
-    print("Profondeur max =", p, ":", taux_erreur(Y, y_pred))
+for k in [3, 5, 7]:
+    y_pred = kppv(X_train, X_train, y_train, k)
+    y_norm1 = kppv(X_norm1, X_norm1, y_train, k)
+    y_norm2 = kppv(X_norm2, X_norm2, y_train, k)
+    print(
+        "k =",
+        k,
+        ", sans norme :",
+        taux_erreur(y_train, y_pred),
+        ", norme 1 :",
+        taux_erreur(y_train, y_norm1),
+        ", norme 2 :",
+        taux_erreur(y_train, y_norm2),
+    )
