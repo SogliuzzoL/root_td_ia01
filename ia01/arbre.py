@@ -1,5 +1,4 @@
-from ia01.utils import gini, variance, unique
-from ia01.majoritaire import vote_majoritaire
+from ia01.utils import gini, moyenne, variance, unique
 
 def score(y, reg):
     return variance(y) if reg else gini(y)
@@ -21,7 +20,6 @@ def score_coupe(X, y, d, s, reg):
     n_sup = len(y_sup)
     n = n_inf + n_sup
     return n_inf / n * score(y_inf, reg) + n_sup / n * score(y_sup, reg)
-
 
 def seuil_coupe(X, d):
     assert (

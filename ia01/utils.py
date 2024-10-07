@@ -3,17 +3,10 @@ def test_utils():
     print("Test du module utils du package ia01 !")
 
 def unique(y):
-    label = []
-    for element in y:
-        if element not in label:
-            label.append(element)
-    return label
+    return list(set(y))
 
 def compte(y):
-    occurence = {element : 0 for element in unique(y)}
-    for element in y:
-        occurence[element] += 1
-    return occurence
+    return [y.count(li) for li in unique(y)]
 
 def lecture_csv(fichier, sep=","):
     """Lecture d'un fichier texte sous format CSV.
@@ -65,78 +58,29 @@ def argsort(x, reverse=False):
     return sorted(range(len(x)), key=x.__getitem__, reverse=reverse)
 
 def normalisation(X, loc, scale):
-    """Méthodes de normalisation de vecteurs
-
-    Paramètres
-    ----------
-    X : list[list]
-        Liste de vecteurs sur lesquels appliquer la normalisation
-    loc, scale : list
-        Liste de paramètres de normalisation pour chaque dimension
-        Pour un vecteur x de la liste X, la normalisation pour chaque dimension est :
-        x[j] = (x[j] - loc[j]) / scale[j]
-
-    Sorties
-    -------
-    Xnorm : list[list]
-        Liste des vecteurs normalisés
-    """
-    X_norm = []
-
-    for x in X:
-        x_norm = []
-        for j in range(len(x)):
-            x_norm.append((x[j] - loc[j]) / scale[j])
-        X_norm.append(x_norm)
-
-    return X_norm
+    return [[(xij - l) / s for xij, l, s in zip(xi, loc, scale)] for xi in X]
 
 def norm_param(X, methode="echelle"):
-    """Calcul des paramètres de normalisation
-
-    Paramètres
-    ----------
-    X : list[list]
-        Liste de vecteurs à partir desquels calculer les paramètres de normalisation
-    methode : str, default = "echelle"
-        Méthode de normalisation utilisée : "echelle" ou "centre"
-
-    Sorties
-    -------
-    loc, scale : list
-        Liste de paramètres de normalisation pour chaque dimension
-    """
-
     assert (
         methode == "echelle" or methode == "centre"
     ), "Le paramètre `methode` doit valoir `echelle` ou `centre`."
 
-    loc = []
-    scale = []
+    d = len(X[0])
+    if methode == "echelle":
+        loc = [min([xi[j] for xi in X]) for j in range(d)]
+        scale = [max([xi[j] for xi in X]) - min([xi[j] for xi in X]) for j in range(d)]
+    else:
+        loc = [moyenne([xi[j] for xi in X]) for j in range(d)]
+        scale = [ecart_type([xi[j] for xi in X]) for j in range(d)]
 
-    for i in range(len(X[0])):
-        L = [x[i] for x in X]
-        if methode == "echelle":
-            loc.append(min(L))
-            scale.append(max(L) - min(L))
-        else:
-            loc.append(moyenne(L))
-            scale.append(ecart_type(L))
-    
     return loc, scale
 
-def variance(X):
-    n = len(X)
-    moy = moyenne(X)
-    sigma = 0
+def variance(x):
+    x_moy = moyenne(x)
+    return moyenne([(xi - x_moy) ** 2 for xi in x])
 
-    for x in X:
-        sigma += (x - moy) ** 2
-
-    return sigma / n
-
-def ecart_type(X):
-    return variance(X) ** (1 / 2)
+def ecart_type(x):
+    return variance(x) ** 0.5
 
 def gini(y):
     c = compte(y)
