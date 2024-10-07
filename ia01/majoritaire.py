@@ -1,4 +1,4 @@
-from ia01.utils import unique, compte
+from ia01.utils import unique, compte, moyenne
 
 
 def vote_majoritaire(y, reg=False):

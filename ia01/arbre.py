@@ -1,4 +1,5 @@
-from ia01.utils import gini, moyenne, variance, unique
+from ia01.utils import gini, variance, unique
+from ia01.majoritaire import vote_majoritaire
 
 def score(y, reg):
     return variance(y) if reg else gini(y)
