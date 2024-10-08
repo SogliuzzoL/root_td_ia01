@@ -1,5 +1,5 @@
 from ia01.utils import lecture_csv, est_complet
-from ia01.metriques import valeurs_lim, taux_erreur
+from ia01.metriques import valeurs_lim, taux_erreur, f_score
 from ia01.evaluation import partition_train_val, partition_val_croisee
 from ia01.arbre import arbre_train, arbre_pred
 
@@ -75,8 +75,9 @@ X_train, y_train, X_test, y_test = partition_train_val(X, y, 0.25)
 K = 5
 X_K, y_K = partition_val_croisee(X_train, y_train, K)
 
-for prof in range(1, 5):
+for prof in range(1, 20):
     erreur_cv = 0
+    erreur_cv_f_score = 0
     for i in range(K):
         X_val, y_val = X_K[i], y_K[i]
         X_train, y_train = [], []
@@ -87,11 +88,10 @@ for prof in range(1, 5):
         arbre = arbre_train(X_train, y_train, max_prof=prof)
         y_pred_val = arbre_pred(X_val, arbre, max_prof=prof)
         erreur_cv += taux_erreur(y_val, y_pred_val)
+        erreur_cv_f_score += f_score(y_val, y_pred_val, 1)
     erreur_cv /= K    
+    erreur_cv_f_score /= K
     
     arbre = arbre_train(X, y, max_prof=prof)
-    y_pred_test = arbre_pred(X_test, arbre, max_prof=prof)
-    erreur_test = taux_erreur(y_test, y_pred_test)
-    print(
-        f"Taux d'erreur pour prof={prof} ; VC={erreur_cv:.3f} ; test={erreur_test:.3f}"
-    )
+    print(f"Taux d'erreur pour prof={prof} ; VC={erreur_cv:.3f}")
+    print(f"F-Score pour prof={prof} ; VC={erreur_cv_f_score:.3f}")

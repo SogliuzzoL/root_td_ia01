@@ -34,3 +34,33 @@ def valeurs_lim(X):
         elif x > v_max and x <= Q3 + 1.5 * IQR:
             v_max = x
     return v_min, v_max
+
+def precision(y_true, y_pred, label_pos):
+    VP = 0
+    FP = 0
+    for i, y in enumerate(y_pred):
+        if y == label_pos and y == y_true[i]:
+            VP += 1
+        elif y == label_pos and y != y_true[i]:
+            FP += 1
+    if VP + FP == 0:
+        return 0
+    return VP / (VP + FP)
+def rappel(y_true, y_pred, label_pos):
+    VP = 0
+    FN = 0
+    for i, y in enumerate(y_pred):
+        if y == label_pos and y == y_true[i]:
+            VP += 1
+        elif y != label_pos and y == y_true[i]:
+            FN += 1
+    if VP + FN == 0:
+        return 0
+    return VP / (VP + FN)
+
+def f_score(y_true, y_pred, label_pos, beta=1):
+    prec = precision(y_true, y_pred, label_pos)
+    rap = rappel(y_true, y_pred, label_pos)
+    if prec == 0 or rap == 0:
+        return 0
+    return (1 + beta**2) * (prec * rap) / (beta ** 2 * prec + rap)
