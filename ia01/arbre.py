@@ -28,7 +28,6 @@ def seuil_coupe(X, d):
     ), "Le paramètre `d` doit être un entier positif."
 
     xd = sorted(unique([x[d] for x in X]))
-
     return [(xd[i] + xd[i+1]) / 2 for i in range(len(xd)-1)]
 
 def meilleure_coupe(X, y, reg):

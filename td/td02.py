@@ -1,6 +1,7 @@
-from ia01.utils import lecture_csv
+from ia01.utils import lecture_csv, norm_param, normalisation
 from ia01.metriques import taux_erreur, reqm
 from ia01.majoritaire import vote_majoritaire
+from ia01.kppv import kppv
 from ia01.arbre import arbre_train, arbre_pred
 
 # Exercice 1
