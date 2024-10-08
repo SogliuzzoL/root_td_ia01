@@ -1,1 +1,3 @@
-# Travaux dirigés du cours CSC_3IA01_TA 
+# Travaux dirigés du cours IA01
+
+Travaux dirigés du cours IA01

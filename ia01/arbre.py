@@ -1,19 +1,47 @@
-from ia01.utils import gini, variance, unique
+from ia01.utils import unique, variance, gini
+from ia01.metriques import eqm
 from ia01.majoritaire import vote_majoritaire
+
 
 def score(y, reg):
     return variance(y) if reg else gini(y)
 
+
 def coupe(X, y, d, s):
+    """Partitionnement d'un ensemble sur le dimension d par rapport à un seuil s
+
+    Paramètres
+    ----------
+    X : list[list]
+        Liste de vecteurs à partitionner
+    y : list
+        Liste des prédictions associées à X
+    d : int
+        Dimension selon laquelle faire la coupe
+    s : float
+        Seuil pour faire la coupe
+
+    Sorties
+    -------
+    X_inf, y_inf, X_sup, y_sup :
+        X_inf, y_inf : partie des éléments tels que x[d] <= s
+        X_sup, y_sup : partie des éléments tels que x[d] > s
+    """
     assert (
         isinstance(d, int) and d >= 0
     ), "Le paramètre `d` doit être un entier positif."
 
-    X_inf = [xi for xi in X if xi[d] <= s]
-    y_inf = [yi for (xi, yi) in zip(X, y) if xi[d] <= s]
-    X_sup = [xi for xi in X if xi[d] > s]
-    y_sup = [yi for (xi, yi) in zip(X, y) if xi[d] > s]
+    n = len(X)
+    X_inf, y_inf, X_sup, y_sup = [], [], [], []
+    for i in range(n):
+        if X[i][d] <= s:
+            X_inf.append(X[i])
+            y_inf.append(y[i])
+        else:
+            X_sup.append(X[i])
+            y_sup.append(y[i])
     return X_inf, y_inf, X_sup, y_sup
+
 
 def score_coupe(X, y, d, s, reg):
     _, y_inf, _, y_sup = coupe(X, y, d, s)
@@ -22,15 +50,58 @@ def score_coupe(X, y, d, s, reg):
     n = n_inf + n_sup
     return n_inf / n * score(y_inf, reg) + n_sup / n * score(y_sup, reg)
 
+
 def seuil_coupe(X, d):
+    """Calcul des seuils auxquels partitionner un ensemble sur la dimension d
+
+    Paramètres
+    ----------
+    X : list[list]
+        Liste de vecteurs à partitionner
+    d : int
+        Dimension selon laquelle faire la coupe
+
+    Sorties
+    -------
+    seuils : list
+        Seuils pour faire les coupes
+    """
     assert (
         isinstance(d, int) and d >= 0
     ), "Le paramètre `d` doit être un entier positif."
 
-    xd = sorted(unique([x[d] for x in X]))
-    return [(xd[i] + xd[i+1]) / 2 for i in range(len(xd)-1)]
+    xd = [x[d] for x in X]
+    xd = sorted(unique(xd))
+    n = len(xd)
+
+    seuils = []
+    for i in range(n - 1):
+        seuils.append((xd[i] + xd[i + 1]) / 2)
+
+    return seuils
+
 
 def meilleure_coupe(X, y, reg):
+    """Calcul des seuils auxquels partitionner un ensemble sur la dimension d
+
+    Paramètres
+    ----------
+    X : list[list]
+        Liste de vecteurs à partitionner
+    y : list
+        Liste des prédictions associées à X
+    reg : bool
+        Indique s'il s'agit d'un problème de régression (True) ou de classification (False)
+
+    Sorties
+    -------
+    best_dim : int
+        Meilleure dimension pour faire la coupe
+    best_seuil : float
+        Meilleure seuils pour faire la coupe
+    X_inf, y_inf, X_sup, y_sup : list
+        Partitionnement résultant de la coupe
+    """
     dim = len(X[0])
     # Initialisation
     best_dim = 0
@@ -49,6 +120,7 @@ def meilleure_coupe(X, y, reg):
     X_inf, y_inf, X_sup, y_sup = coupe(X, y, best_dim, best_seuil)
     return best_dim, best_seuil, X_inf, y_inf, X_sup, y_sup
 
+
 def arbre_train(X_train, y_train, reg=False, max_prof=float("inf"), profondeur=0):
     """
     Apprentissage d'un arbre de décision
@@ -60,7 +132,7 @@ def arbre_train(X_train, y_train, reg=False, max_prof=float("inf"), profondeur=0
     y_train : list
         Liste des prédictions associées aux éléments de X_train
     reg : bool, default = False
-        Indique s'il s'agit d'un problème de régression (True) 
+        Indique s'il s'agit d'un problème de régression (True)
         ou de classification (False)
     max_prof : int, default = float("inf")
         Profondeur maximale de l'arbre de décision
@@ -70,10 +142,10 @@ def arbre_train(X_train, y_train, reg=False, max_prof=float("inf"), profondeur=0
     Sorties
     -------
     arbre :
-        Structure arbre binaire, chaque noeud est un dictionnaire contenant 
+        Structure arbre binaire, chaque noeud est un dictionnaire contenant
         un champ "info" et un champ "coupe".
-        Dans le champ "info", il y a l'information de profondeur ("profondeur"), 
-        le score associé ("score") et une prédiction si elle est faite 
+        Dans le champ "info", il y a l'information de profondeur ("profondeur"),
+        le score associé ("score") et une prédiction si elle est faite
         au niveau de ce noeud ("prediction").
         Le champ "coupe" est nul ("None") si le noeud est une feuille, sinon il
         contient la dimension ("dimension") et le seuil ("seuil") de la coupe ainsi
@@ -107,7 +179,7 @@ def arbre_pred(X, arbre, max_prof=float("inf")):
     ----------
     X : list[list]
         Liste de vecteurs sur lesquels appliquer l'arbre de décision
-    arbre : 
+    arbre :
         Arbre de décision
     max_prof : int, default = float("inf")
         Profondeur maximale d'exploration de l'arbre de décision
@@ -130,3 +202,19 @@ def arbre_pred(X, arbre, max_prof=float("inf")):
                 return arbre_pred_single(x, arbre["coupe"]["arbre_sup"], max_prof)
 
     return [arbre_pred_single(x, arbre, max_prof) for x in X]
+
+
+def print_arbre(arbre, max_prof=float("inf"), attribut_label=None, tab=0):
+    if arbre["coupe"] is None or arbre["info"]["profondeur"] >= max_prof:
+        print(f"{'    '*tab}Prédiction : {arbre['info']['prediction']}")
+    else:
+        d = arbre["coupe"]["dimension"]
+        s = arbre["coupe"]["seuil"]
+        if attribut_label is None:
+            dim = f"x[{d}]"
+        else:
+            dim = attribut_label[d]
+        print(f"{'    '*tab}Si {dim} <= {s}")
+        print_arbre(arbre["coupe"]["arbre_inf"], max_prof, attribut_label, tab + 1)
+        print(f"{'    '*tab}Sinon")
+        print_arbre(arbre["coupe"]["arbre_sup"], max_prof, attribut_label, tab + 1)

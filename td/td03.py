@@ -1,8 +1,14 @@
-from ia01.utils import lecture_csv
-from ia01.metriques import taux_erreur, reqm
-from ia01.kppv import kppv
-from ia01.evaluation import partition_train_val, partition_val_croisee
-from ia01.arbre import arbre_train, arbre_pred
+from ia01.utils import *
+from ia01.metriques import *
+from ia01.kppv import *
+from ia01.evaluation import *
+from ia01.arbre import *
+
+print("==== TD 03 ====")
+
+## Exercice 1.1
+# =============
+print("\n== Exercice 1.1 ==")
 
 data = lecture_csv("data/dorade.csv")
 X_train = [[float(d["longueur"]), float(d["poids"])] for d in data]
@@ -19,6 +25,10 @@ for k in range(1,8,2):
     err_test = taux_erreur(y_test, y_pred_test)
     print(f"Taux d'erreur pour k={k} : train={err_train}, test={err_test}")
 
+## Exercice 1.3
+# =============
+print("\n== Exercice 1.3 ==")
+
 data = lecture_csv("data/dorade.csv")
 X = [[float(d["longueur"]), float(d["poids"])] for d in data]
 y = [d["espece"] for d in data]
@@ -33,7 +43,12 @@ for r in [1 / 5, 1 / 4, 1 / 3, 1 / 2]:
             f"Taux d'erreur pour k={k} ; val={taux_erreur(y_val, y_pred_val):.3f} ; test={taux_erreur(y_test, y_pred_test):.3f}"
         )
 
-# KPPV
+## Exercice 1.5
+# =============
+print("\n== Exercice 1.5 ==")
+
+# K-PPV
+data = lecture_csv("data/dorade.csv")
 X = [[float(d["longueur"]), float(d["poids"])] for d in data]
 y = [d["espece"] for d in data]
 
@@ -44,6 +59,7 @@ y_test = [d["espece"] for d in test]
 K = 5
 X_K, y_K = partition_val_croisee(X, y, K)
 
+print("\n== Validation croisée K-PPV ==")
 for k in [1, 3, 5, 7]:
     erreur_cv = 0
     for i in range(K):
@@ -64,16 +80,7 @@ for k in [1, 3, 5, 7]:
     )
 
 # Arbre de décision
-X = [[float(d["longueur"]), float(d["poids"])] for d in data]
-y = [d["espece"] for d in data]
-
-test = lecture_csv("data/dorade_test.csv")
-X_test = [[float(d["longueur"]), float(d["poids"])] for d in test]
-y_test = [d["espece"] for d in test]
-
-K = 5
-X_K, y_K = partition_val_croisee(X, y, K)
-
+print("\n== Validation croisée Arbre de décision ==")
 for prof in [3, 5, 7, float("inf")]:
     erreur_cv = 0
     for i in range(K):
@@ -95,7 +102,8 @@ for prof in [3, 5, 7, float("inf")]:
         f"Taux d'erreur pour prof={prof} ; VC={erreur_cv:.3f} ; test={erreur_test:.3f}"
     )
 
-# KPPV reg
+# K-PPV (régression)
+data = lecture_csv("data/dorade.csv")
 X = [[float(d["longueur"])] for d in data]
 y = [float(d["poids"]) for d in data]
 
@@ -106,6 +114,7 @@ y_test = [float(d["poids"]) for d in test]
 K = 5
 X_K, y_K = partition_val_croisee(X, y, K)
 
+print("\n== Validation croisée K-PPV (régression) ==")
 for k in [1, 3, 5, 7]:
     erreur_cv = 0
     for i in range(K):
@@ -124,17 +133,8 @@ for k in [1, 3, 5, 7]:
         f"REQM pour k={k} ; VC={erreur_cv:.3f} ; test={erreur_test:.3f}"
     )
 
-# Arbre reg
-X = [[float(d["longueur"])] for d in data]
-y = [float(d["poids"]) for d in data]
-
-test = lecture_csv("data/dorade_test.csv")
-X_test = [[float(d["longueur"])] for d in test]
-y_test = [float(d["poids"]) for d in test]
-
-K = 5
-X_K, y_K = partition_val_croisee(X, y, K)
-
+# Arbre (régression)
+print("\n== Validation croisée Arbre (régression) ==")
 for prof in [3, 5, 7, float("inf")]:
     erreur_cv = 0
     for i in range(K):
