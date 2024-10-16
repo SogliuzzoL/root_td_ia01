@@ -3,6 +3,8 @@ pyproject.toml
 setup.cfg
 setup.py
 ia01/__init__.py
+ia01/arbre.py
+ia01/evaluation.py
 ia01/kppv.py
 ia01/majoritaire.py
 ia01/metriques.py
