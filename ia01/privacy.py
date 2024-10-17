@@ -152,20 +152,3 @@ def discretisation(x, seuils : list):
             return seuil
     return seuils_copy[-1]
 
-def l_diversite(data, attributs, sensible):
-    """l-diversité d'un jeu de données selon une liste d'attributs
-
-    Paramètres
-    ----------
-    data : list[dict]
-        Liste d'individus décrits par un dictionnaire
-    attributs : list
-        Liste des attributs selon lesquels les individus sont comparés
-    sensible :
-        Attribut sensible sur lequel calculer la diversité
-
-    Sorties
-    -------
-    l : int
-        l-diversité de data selon la liste d'attributs
-    """
