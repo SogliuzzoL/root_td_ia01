@@ -8,6 +8,7 @@ ia01/evaluation.py
 ia01/kppv.py
 ia01/majoritaire.py
 ia01/metriques.py
+ia01/privacy.py
 ia01/utils.py
 ia01.egg-info/PKG-INFO
 ia01.egg-info/SOURCES.txt

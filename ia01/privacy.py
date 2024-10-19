@@ -55,26 +55,6 @@ def groupe(data, attributs):
                 G.append(len(Groupe))
     return G
 
-def groupe2(data, attributs):
-    Groupe = []
-    G = []
-    for element in data:
-        if Groupe == []:
-            Groupe.append([element])
-            G.append(len(Groupe))
-        else:
-            ajoute = False
-            for i, g in enumerate(Groupe):
-                if est_identique(element, g[0], attributs):
-                    ajoute = True
-                    g.append(element)
-                    G.append(i + 1)
-                    break
-            if not ajoute:
-                Groupe.append([element])
-                G.append(len(Groupe))
-    return Groupe
-
 def k_anonymite(data, attributs):
     """k-anonymité d'un jeu de données selon une liste d'attributs
 
