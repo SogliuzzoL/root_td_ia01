@@ -131,7 +131,7 @@ def valeurs_lim(X):
     v_min, v_max : float
         v_min : plus petit x de X tel que x >= Q1 - 1.5 * IQR
         v_max : plus grand x de X tel que x <= Q3 + 1.5 * IQR
-        où Q1, Q3 sont les premier et troisième quartiles de X : 
+        où Q1, Q3 sont les premier et troisième quartiles de X :
             Q1 = quantile(X, 0.25), Q3 = quantile(X, 0.75)
         et IQR est l'écart interquartile : Q3 - Q1
     """
@@ -148,6 +148,7 @@ def valeurs_lim(X):
     v_max = max(x_max)
 
     return v_min, v_max
+
 
 def precision(y_true, y_pred, label_pos):
     """Précision
@@ -240,6 +241,7 @@ def f_score(y_true, y_pred, label_pos, beta=1):
     else:
         return ((1 + beta**2) * (prec * rap)) / (beta**2 * prec + rap)
 
+
 def matrice_confusion(y_true, y_pred, labels=None):
     """Matrice de confusion
 
@@ -268,8 +270,31 @@ def matrice_confusion(y_true, y_pred, labels=None):
         mat[idx[yp]][idx[yt]] += 1
     return mat
 
+
+## TD05
+# ==============
+
+
 def TPR(y_true, y_pred, label_pos):
+    """Taux de vrais positifs = Rappel
+
+    Paramètres
+    ----------
+    y_true : list
+        Liste contenant les vraies valeurs
+    y_pred : list
+        Liste contenant les valeurs prédites par un classifieur
+    label_pos :
+        Label de la classe considérée comme positive
+
+    Sorties
+    -------
+    rap : float [0,1]
+        rap = VP / (VP + FN)
+        Si VP + FN = 0, alors rap = 0
+    """
     return rappel(y_true, y_pred, label_pos)
+
 
 def FPR(y_true, y_pred, label_pos):
     """Taux de faux positifs, False Positive Rate
@@ -289,16 +314,19 @@ def FPR(y_true, y_pred, label_pos):
         fpr = FP / (VN + FP)
         Si VN + FP = 0, alors fpr = 0
     """
-    FP, VN = 0, 0
-    for yt, yp in zip(y_true, y_pred):
-        if yt != label_pos:
-            if yp == label_pos:
+    FP = 0
+    VN = 0
+    for i in range(len(y_true)):
+        if y_true[i] != label_pos:
+            if y_pred[i] == label_pos:
                 FP += 1
             else:
                 VN += 1
-    if VN + FP == 0:
+    if FP + VN == 0:
         return 0
-    return FP / (VN + FP)
+    else:
+        return FP / (VN + FP)
+
 
 def ROC(y_true, s_pred, label_pos, seuils):
     """Receiver Operating Characteristic
@@ -319,9 +347,10 @@ def ROC(y_true, s_pred, label_pos, seuils):
     tpr, fpr : list
         Liste des TPR/FPR pour les différentes valeurs du seuil
     """
-    tpr, fpr = [], []
-    for seuil in seuils:
-        y_pred = [int(s >= seuil) for s in s_pred]
+    tpr = []
+    fpr = []
+    for t in seuils:
+        y_pred = [label_pos if s >= t else float("nan") for s in s_pred]
         tpr.append(TPR(y_true, y_pred, label_pos))
         fpr.append(FPR(y_true, y_pred, label_pos))
     return tpr, fpr

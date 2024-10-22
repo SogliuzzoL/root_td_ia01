@@ -1,3 +1,6 @@
+from ia01.utils import compte, unique
+
+
 def est_identique(d1, d2, attributs):
     """Calcule si d1 et d2 sont identiques selon une liste d'attributs
 
@@ -15,9 +18,11 @@ def est_identique(d1, d2, attributs):
     boolean
         True si d1[a] == d2[a] pour tout a dans attributs
     """
-    for attribut in attributs:
-        if d1[attribut] != d2[attribut]: return False
+    for a in attributs:
+        if d1[a] != d2[a]:
+            return False
     return True
+
 
 def groupe(data, attributs):
     """Regroupe les individus partageant les mêmes attributs
@@ -36,44 +41,18 @@ def groupe(data, attributs):
         Tous les individus du même groupe sont égaux selon les attributs considérés
         Les groupes sont indexés de 1 jusqu'à max(G) et il y a exactement max(G) groupes différents
     """
-    Groupe = []
-    G = []
-    for element in data:
-        if Groupe == []:
-            Groupe.append([element])
-            G.append(len(Groupe))
-        else:
-            ajoute = False
-            for i, g in enumerate(Groupe):
-                if est_identique(element, g[0], attributs):
-                    ajoute = True
-                    g.append(element)
-                    G.append(i + 1)
-                    break
-            if not ajoute:
-                Groupe.append([element])
-                G.append(len(Groupe))
+    n = len(data)
+    G = [0] * n
+    idx = 1
+    for i in range(n):
+        if G[i] == 0:  # Nouveau groupe
+            G[i] = idx
+            for j in range(i + 1, n):
+                if est_identique(data[i], data[j], attributs):
+                    G[j] = idx
+            idx += 1
     return G
 
-def groupe2(data, attributs):
-    Groupe = []
-    G = []
-    for element in data:
-        if Groupe == []:
-            Groupe.append([element])
-            G.append(len(Groupe))
-        else:
-            ajoute = False
-            for i, g in enumerate(Groupe):
-                if est_identique(element, g[0], attributs):
-                    ajoute = True
-                    g.append(element)
-                    G.append(i + 1)
-                    break
-            if not ajoute:
-                Groupe.append([element])
-                G.append(len(Groupe))
-    return Groupe
 
 def k_anonymite(data, attributs):
     """k-anonymité d'un jeu de données selon une liste d'attributs
@@ -91,10 +70,8 @@ def k_anonymite(data, attributs):
         k-anonymité de data selon la liste d'attributs
     """
     G = groupe(data, attributs)
-    count = [0 for _ in range(max(G))]
-    for g in G:
-        count[g - 1] += 1
-    return min(count)
+    return min(compte(G))
+
 
 def discret_seuils(X, k):
     """Calcule les seuils de discrétisation de X pour avoir au moins k éléments par interval
@@ -112,43 +89,68 @@ def discret_seuils(X, k):
         Le nombre d'élements de X tels que seuils[i] <= x < seuils[i+1] est supérieur ou égal à k
         Le dernier élément de seuils est float("inf")
     """
-    count = {}
-    for x in X:
-        if x in count.keys():
-            count[x] += 1
+    X = sorted(X)
+    lim = [X[0]]
+    l = X[0]
+    count = 1
+    for i in range(1, len(X)):
+        if count >= k and X[i] > l:  # Nouveau groupe
+            l = X[i]
+            count = 1
+            lim.append(l)
         else:
-            count[x] = 1
-    cles = list(count.keys())
-    cles.sort()
-    seuils = []
-    n = 0
-    for cle in cles:
-        n += count[cle]
-        if n >= k:
-            n = 0
-            seuils.append(cle)
-    seuils.append(float("inf"))
-    return seuils
+            count += 1
+            if X[i] > l:
+                l = X[i]
+    if count < k:  # Le dernier seuils ne construit pas un interval suffisant
+        lim[-1] = float("inf")
+    else:
+        lim.append(float("inf"))
+    return lim
 
-def discretisation(x, seuils : list):
+
+def discretisation(x, seuils):
     """Discrétise une valeur selon des seuils
 
     Paramètres
     ----------
     x : float
-        Une valeur à discrétiser    
+        Une valeur à discrétiser
     seuils : list
         Seuils de discrétisation
 
     Sorties
     -------
     i : int
-        Indice tel que seuils[i] <= x < seuils[i+1] 
+        Indice tel que seuils[i] <= x < seuils[i+1]
     """
-    seuils_copy = seuils.copy()
-    seuils_copy.sort(reverse=True)
-    for seuil in seuils_copy:
-        if x >= seuil:
-            return seuil
-    return seuils_copy[-1]
+    for i in range(len(seuils) - 1):
+        if x >= seuils[i] and x < seuils[i + 1]:
+            return i
 
+
+def l_diversite(data, attributs, sensible):
+    """l-diversité d'un jeu de données selon une liste d'attributs
+
+    Paramètres
+    ----------
+    data : list[dict]
+        Liste d'individus décrits par un dictionnaire
+    attributs : list
+        Liste des attributs selon lesquels les individus sont comparés
+    sensible :
+        Attribut sensible sur lequel calculer la diversité
+
+    Sorties
+    -------
+    l : int
+        l-diversité de data selon la liste d'attributs
+    """
+    G = groupe(data, attributs)
+    div = []
+    for g in unique(G):
+        dg = [d for i, d in enumerate(data) if G[i] == g]
+        S = [d[sensible] for d in dg]
+        l = len(unique(S))
+        div.append(l)
+    return min(div)
